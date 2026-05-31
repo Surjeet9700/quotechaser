@@ -25,16 +25,16 @@ export function LoginForm({ devBypassEnabled }: { devBypassEnabled: boolean }) {
         </div>
       )}
       {state?.success && (
-        <div className="border-[#F26522]/20 bg-[#F26522]/5 text-[#F26522] rounded-2xl border p-4 text-xs font-medium leading-relaxed">
+        <div className="border-[#F26522]/20 bg-[#F26522]/5 text-[#F26522] rounded-2xl border p-4 text-[13px] font-medium leading-relaxed text-center">
           ✨ We sent you a magic link. Check your inbox to sign in!
         </div>
       )}
 
       {!state?.success && (
         <form action={formAction}>
-          <FieldGroup className="gap-4">
+          <FieldGroup className="gap-5">
             <Field>
-              <FieldLabel htmlFor="email" className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <FieldLabel htmlFor="email" className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">
                 Email Address
               </FieldLabel>
               <Input
@@ -43,13 +43,13 @@ export function LoginForm({ devBypassEnabled }: { devBypassEnabled: boolean }) {
                 required
                 type="email"
                 placeholder="you@company.com"
-                className="h-10 rounded-full border-gray-200 px-4 text-sm focus-visible:ring-[#F26522]/30 focus-visible:border-[#F26522]"
+                className="h-11 rounded-full border-gray-200/60 px-5 text-[14px] bg-white/60 focus-visible:bg-white focus-visible:ring-[#F26522]/30 focus-visible:border-[#F26522] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] placeholder:text-gray-300"
               />
             </Field>
             
             <SubmitButton 
               variant="brand"
-              className="w-full rounded-full font-semibold h-10 mt-2"
+              className="w-full rounded-full font-bold h-11 mt-2 shadow-md shadow-[#F26522]/20 hover:shadow-lg hover:shadow-[#F26522]/30 transition-all hover:scale-[1.02]"
               icon={<Mail className="w-4 h-4" />}
             >
               Send magic link
@@ -60,7 +60,7 @@ export function LoginForm({ devBypassEnabled }: { devBypassEnabled: boolean }) {
                 type="submit"
                 formAction={devBypassLogin}
                 formNoValidate
-                className="w-full bg-gray-900 hover:bg-black text-white rounded-full font-semibold h-10 flex items-center justify-center border-none shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.02]"
+                className="w-full bg-gray-900 hover:bg-black text-white rounded-full font-semibold h-11 flex items-center justify-center border-none shadow-sm transition-all duration-300 cursor-pointer hover:scale-[1.02] mt-2"
               >
                 Dev Bypass (Login as Demo User)
               </Button>

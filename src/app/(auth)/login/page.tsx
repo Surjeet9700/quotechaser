@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
+import { LoginBackground } from "@/components/auth/login-background";
+import Link from "next/link";
 
 function hasSupabaseConfig() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -18,62 +20,25 @@ export default async function LoginPage() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/");
+    redirect("/dashboard");
   }
 
   const devBypassEnabled = process.env.ENABLE_DEV_BYPASS === "true";
 
   return (
-    <main className="grid min-h-screen grid-cols-1 lg:grid-cols-[1fr_480px] bg-[#EFEFEF] text-gray-900 selection:bg-white selection:text-gray-900">
-      {/* Left panel: Value prop showcase */}
-      <section className="flex flex-col justify-between p-8 sm:p-12 bg-gray-900 text-white relative overflow-hidden">
-        {/* Subtle glowing decoration */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#F26522]/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1.5 shadow-sm border border-white/10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="QuoteChaser Logo" className="w-full h-full object-contain mix-blend-multiply" />
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight text-white">QuoteChaser</span>
-        </div>
+    <main className="relative w-full h-svh bg-[#EFEFEF] overflow-hidden flex flex-col items-center justify-center text-gray-900 selection:bg-gray-900 selection:text-white">
+      <LoginBackground />
 
-        <div className="relative z-10 my-auto py-12 max-w-2xl">
-          <span className="text-[11px] font-semibold text-[#F26522] uppercase tracking-wider block mb-3">Simple Quote Automation</span>
-          <h1 className="text-[clamp(1.75rem,5vw,2.75rem)] font-medium leading-[1.1] tracking-[-0.03em] text-white">
-            Stop losing quotes because follow-up lives in your head.
-          </h1>
-          <p className="text-white/60 mt-4 max-w-xl text-[14px] leading-relaxed">
-            Add a quote in 20 seconds, see exactly when it&apos;s due, copy a psychology-backed follow-up template, and secure more business. No complex CRM setup needed.
-          </p>
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-3 max-w-3xl">
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-sm relative overflow-hidden">
-              <p className="font-semibold text-white text-[13px] uppercase tracking-wider">1. Add Quote</p>
-              <p className="text-white/50 text-[12px] mt-2 leading-relaxed">Enter customer name, sent date, and quote value.</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-sm relative overflow-hidden">
-              <p className="font-semibold text-white text-[13px] uppercase tracking-wider">2. Automate</p>
-              <p className="text-white/50 text-[12px] mt-2 leading-relaxed">Receive follow-up sequences at Day 2, 7, 14, and 30.</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-sm relative overflow-hidden">
-              <p className="font-semibold text-white text-[13px] uppercase tracking-wider">3. Track ROI</p>
-              <p className="text-white/50 text-[12px] mt-2 leading-relaxed">Track closed wins and watch your revenue grow.</p>
-            </div>
-          </div>
-        </div>
-
-        <p className="relative z-10 text-white/40 text-[12px] font-medium">
-          Built with love for freelancers, solo service professionals, and tiny B2B agencies.
-        </p>
-      </section>
-
-      {/* Right panel: Login card */}
-      <section className="flex items-center justify-center p-6 sm:p-10 bg-white">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-          <div className="mb-6">
-            <h2 className="text-[22px] font-semibold tracking-tight text-gray-900">Start with email</h2>
-            <p className="text-gray-400 text-xs mt-1.5 leading-relaxed">We will send a magic sign-in link to your inbox. No passwords, no extra accounts.</p>
+      {/* Login Card */}
+      <section className="relative z-20 w-full max-w-md px-4 sm:px-6">
+        <div className="bg-white/80 backdrop-blur-xl rounded-[28px] p-8 sm:p-10 border border-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-col items-center mb-8">
+            <Link href="/" className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-100 p-2 mb-5 hover:scale-105 transition-transform duration-300">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="QuoteChaser Logo" className="w-full h-full object-contain mix-blend-multiply" />
+            </Link>
+            <h1 className="text-[24px] font-bold tracking-tight text-gray-900 text-center">Welcome back</h1>
+            <p className="text-gray-500 text-[13px] font-medium mt-1.5 leading-relaxed text-center">Sign in to your Next-Action Queue</p>
           </div>
           
           <LoginForm devBypassEnabled={devBypassEnabled} />
