@@ -1,21 +1,13 @@
-/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element, @typescript-eslint/no-unused-vars */
-import { Clipboard, Mail } from "lucide-react";
-import { devBypassLogin, signInWithEmail } from "@/app/actions";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { SubmitButton } from "./submit-button";
+import { LoginForm } from "@/components/auth/login-form";
 
 function hasSupabaseConfig() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
-type SearchParams = Promise<{ [key: string]: string | undefined }>;
-
-export default async function LoginPage(props: { searchParams: SearchParams }) {
+export default async function LoginPage() {
   if (!hasSupabaseConfig()) {
     return <SetupRequired />;
   }
@@ -29,9 +21,7 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
     redirect("/");
   }
 
-  const searchParams = await props.searchParams;
-  const authStatus = searchParams.auth;
-  const authMessage = searchParams.message;
+  const devBypassEnabled = process.env.ENABLE_DEV_BYPASS === "true";
 
   return (
     <main className="grid min-h-screen grid-cols-1 lg:grid-cols-[1fr_480px] bg-[#EFEFEF] text-gray-900 selection:bg-white selection:text-gray-900">
@@ -42,6 +32,7 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
         
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1.5 shadow-sm border border-white/10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="QuoteChaser Logo" className="w-full h-full object-contain mix-blend-multiply" />
           </div>
           <span className="text-[15px] font-semibold tracking-tight text-white">QuoteChaser</span>
@@ -53,7 +44,7 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
             Stop losing quotes because follow-up lives in your head.
           </h1>
           <p className="text-white/60 mt-4 max-w-xl text-[14px] leading-relaxed">
-            Add a quote in 20 seconds, see exactly when it's due, copy a psychology-backed follow-up template, and secure more business. No complex CRM setup needed.
+            Add a quote in 20 seconds, see exactly when it&apos;s due, copy a psychology-backed follow-up template, and secure more business. No complex CRM setup needed.
           </p>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3 max-w-3xl">
@@ -85,51 +76,7 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
             <p className="text-gray-400 text-xs mt-1.5 leading-relaxed">We will send a magic sign-in link to your inbox. No passwords, no extra accounts.</p>
           </div>
           
-          <div className="space-y-4">
-            {authStatus === "error" && (
-              <div className="border-red-200 bg-red-50 text-red-700 rounded-2xl border p-4 text-xs font-medium leading-relaxed">
-                <strong className="font-semibold">Error: </strong>
-                {authMessage || "An unknown error occurred"}
-              </div>
-            )}
-            {authStatus === "missing-email" && (
-              <div className="border-red-200 bg-red-50 text-red-700 rounded-2xl border p-4 text-xs font-medium leading-relaxed">
-                Please provide a valid email address.
-              </div>
-            )}
-            {authStatus === "check-email" && (
-              <div className="border-[#F26522]/20 bg-[#F26522]/5 text-[#F26522] rounded-2xl border p-4 text-xs font-medium leading-relaxed">
-                ✨ We sent you a magic link. Check your inbox to sign in!
-              </div>
-            )}
-
-            <form action={signInWithEmail}>
-              <FieldGroup className="gap-4">
-                <Field>
-                  <FieldLabel htmlFor="email" className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Address</FieldLabel>
-                  <Input
-                    id="email"
-                    name="email"
-                    required
-                    type="email"
-                    placeholder="you@company.com"
-                    className="h-10 rounded-full border-gray-200 px-4 text-sm focus-visible:ring-[#F26522]/30 focus-visible:border-[#F26522]"
-                  />
-                </Field>
-                <SubmitButton />
-                {process.env.ENABLE_DEV_BYPASS === "true" && (
-                  <Button
-                    type="submit"
-                    formAction={devBypassLogin}
-                    formNoValidate
-                    className="w-full bg-gray-900 hover:bg-black text-white rounded-full font-semibold h-10 flex items-center justify-center border-none shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.02]"
-                  >
-                    Dev Bypass (Login as Demo User)
-                  </Button>
-                )}
-              </FieldGroup>
-            </form>
-          </div>
+          <LoginForm devBypassEnabled={devBypassEnabled} />
         </div>
       </section>
     </main>

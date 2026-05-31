@@ -4,36 +4,39 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import * as schemas from "@/lib/schemas";
 
-type QuoteStatus = "open" | "won" | "lost" | "snoozed";
-
-function appUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-}
+const appUrl = () => {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+};
 
 async function currentUserId() {
   const supabase = await createClient();
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    redirect("/");
+  if (!user) {
+    redirect("/login");
   }
-
   return { supabase, userId: user.id };
 }
 
-export async function signInWithEmail(formData: FormData) {
-  const email = String(formData.get("email") || "")
-    .trim()
-    .toLowerCase();
+export async function signInWithEmail(_prevState: unknown, formData: FormData) {
+  const parseResult = schemas.signInSchema.safeParse({
+    email: formData.get("email"),
+  });
 
-  if (!email) {
-    redirect("/?auth=missing-email");
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.issues[0].message };
   }
 
+  const { email } = parseResult.data;
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -43,10 +46,10 @@ export async function signInWithEmail(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/?auth=error&message=${encodeURIComponent(error.message)}`);
+    return { success: false, error: error.message };
   }
 
-  redirect("/?auth=check-email");
+  return { success: true, error: "" };
 }
 
 export async function signOut() {
@@ -57,23 +60,38 @@ export async function signOut() {
 
 export async function createQuote(formData: FormData) {
   const { supabase, userId } = await currentUserId();
-  const amount = Math.round(Number(formData.get("amount") || 0) * 100);
-  const quoteSentOn = String(formData.get("quoteSentOn") || "");
+  
+  const parseResult = schemas.createQuoteSchema.safeParse({
+    customerName: formData.get("customerName"),
+    contactName: formData.get("contactName"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    service: formData.get("service"),
+    amount: formData.get("amount"),
+    quoteSentOn: formData.get("quoteSentOn"),
+    notes: formData.get("notes"),
+  });
+
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0].message };
+  }
+
+  const data = parseResult.data;
 
   // Default next follow up is +2 days
-  const nextFollowUpAt = new Date(`${quoteSentOn}T00:00:00`);
+  const nextFollowUpAt = new Date(`${data.quoteSentOn}T00:00:00`);
   nextFollowUpAt.setDate(nextFollowUpAt.getDate() + 2);
 
   const { error } = await supabase.from("quotes").insert({
-    contact_name: String(formData.get("contactName") || "").trim(),
-    customer_name: String(formData.get("customerName") || "").trim(),
-    email: String(formData.get("email") || "").trim() || null,
+    contact_name: data.contactName,
+    customer_name: data.customerName,
+    email: data.email || null,
     last_touch_at: null,
-    notes: String(formData.get("notes") || "").trim() || null,
-    phone: String(formData.get("phone") || "").trim() || null,
-    quote_amount_cents: amount,
-    quote_sent_on: quoteSentOn,
-    service: String(formData.get("service") || "").trim(),
+    notes: data.notes || null,
+    phone: data.phone || null,
+    quote_amount_cents: data.amount * 100,
+    quote_sent_on: data.quoteSentOn,
+    service: data.service,
     status: "open",
     user_id: userId,
     next_follow_up_at: nextFollowUpAt.toISOString(),
@@ -84,33 +102,43 @@ export async function createQuote(formData: FormData) {
     return { error: error.message };
   }
 
-  await supabase.from("app_events").insert({
-    event_name: "quote_created",
-    properties: { amount_cents: amount },
-    user_id: userId,
-  });
-
   revalidatePath("/");
   return { success: true };
 }
 
 export async function updateQuote(formData: FormData) {
   const { supabase, userId } = await currentUserId();
-  const id = String(formData.get("id") || "");
-  const amount = Math.round(Number(formData.get("amount") || 0) * 100);
+  
+  const parseResult = schemas.updateQuoteSchema.safeParse({
+    id: formData.get("id"),
+    customerName: formData.get("customerName"),
+    contactName: formData.get("contactName"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    service: formData.get("service"),
+    amount: formData.get("amount"),
+    quoteSentOn: formData.get("quoteSentOn"),
+    notes: formData.get("notes"),
+  });
+
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0].message };
+  }
+
+  const data = parseResult.data;
 
   const { error } = await supabase
     .from("quotes")
     .update({
-      contact_name: String(formData.get("contactName") || "").trim(),
-      customer_name: String(formData.get("customerName") || "").trim(),
-      email: String(formData.get("email") || "").trim() || null,
-      notes: String(formData.get("notes") || "").trim() || null,
-      phone: String(formData.get("phone") || "").trim() || null,
-      quote_amount_cents: amount,
-      service: String(formData.get("service") || "").trim(),
+      contact_name: data.contactName,
+      customer_name: data.customerName,
+      email: data.email || null,
+      notes: data.notes || null,
+      phone: data.phone || null,
+      quote_amount_cents: data.amount * 100,
+      service: data.service,
     })
-    .eq("id", id)
+    .eq("id", data.id)
     .eq("user_id", userId);
 
   if (error) {
@@ -123,12 +151,17 @@ export async function updateQuote(formData: FormData) {
 
 export async function updateQuoteStatus(formData: FormData) {
   const { supabase, userId } = await currentUserId();
-  const id = String(formData.get("id") || "");
-  const status = String(formData.get("status") || "") as QuoteStatus;
+  
+  const parseResult = schemas.updateQuoteStatusSchema.safeParse({
+    id: formData.get("id"),
+    status: formData.get("status"),
+  });
 
-  if (!["open", "won", "lost", "snoozed"].includes(status)) {
-    return { error: "Invalid status" };
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0].message };
   }
+
+  const { id, status } = parseResult.data;
 
   const { error } = await supabase
     .from("quotes")
@@ -145,58 +178,57 @@ export async function updateQuoteStatus(formData: FormData) {
     return { error: error.message };
   }
 
-  await supabase.from("app_events").insert({
-    event_name: `quote_marked_${status}`,
-    properties: { quote_id: id },
-    user_id: userId,
-  });
-
   revalidatePath("/");
+  return { success: true };
 }
 
 export async function logFollowUp(formData: FormData) {
   const { supabase, userId } = await currentUserId();
-  const id = String(formData.get("id") || "");
-  const channel = String(formData.get("channel") || "manual");
-  const currentStage = Number(formData.get("currentStage") || 2);
-  const quoteSentOn = String(formData.get("quoteSentOn") || "");
+  
+  const parseResult = schemas.logFollowUpSchema.safeParse({
+    id: formData.get("id"),
+    channel: formData.get("channel") || "manual",
+    currentStage: formData.get("currentStage") || 2,
+    quoteSentOn: formData.get("quoteSentOn"),
+  });
 
-  if (!id) return { error: "Missing quote ID" };
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0].message };
+  }
+
+  const { id, channel, currentStage, quoteSentOn } = parseResult.data;
 
   // Calculate next stage
   let nextStageDay: number | null = null;
   if (currentStage === 2) nextStageDay = 7;
   else if (currentStage === 7) nextStageDay = 14;
   else if (currentStage === 14) nextStageDay = 30;
-  else nextStageDay = null; // after 30, it stops
 
-  let nextFollowUpAt: string | null = null;
-  if (nextStageDay !== null && quoteSentOn) {
-    const nextDate = new Date(`${quoteSentOn}T00:00:00`);
-    nextDate.setDate(nextDate.getDate() + nextStageDay);
-    nextFollowUpAt = nextDate.toISOString();
+  let nextFollowUpAt: Date | null = null;
+  if (nextStageDay) {
+    nextFollowUpAt = new Date(`${quoteSentOn}T00:00:00`);
+    nextFollowUpAt.setDate(nextFollowUpAt.getDate() + nextStageDay);
   }
 
-  const { error: logError } = await supabase.from("quote_follow_ups").insert({
-    quote_id: id,
-    user_id: userId,
-    channel,
-  });
-
-  if (logError) return { error: logError.message };
-
-  const { error: quoteError } = await supabase
+  const { error } = await supabase
     .from("quotes")
     .update({
       last_touch_at: new Date().toISOString(),
-      last_follow_up_channel: channel,
-      follow_up_stage: nextStageDay,
-      next_follow_up_at: nextFollowUpAt,
+      follow_up_stage: nextStageDay || 30, // stay at 30 if maxed
+      next_follow_up_at: nextFollowUpAt ? nextFollowUpAt.toISOString() : null,
     })
     .eq("id", id)
     .eq("user_id", userId);
 
-  if (quoteError) return { error: quoteError.message };
+  if (error) return { error: error.message };
+
+  // Log in history
+  await supabase.from("follow_up_history").insert({
+    quote_id: id,
+    user_id: userId,
+    channel,
+    notes: `Sent Day ${currentStage} follow-up`,
+  });
 
   revalidatePath("/");
   return { success: true };
@@ -204,7 +236,10 @@ export async function logFollowUp(formData: FormData) {
 
 export async function deleteQuote(formData: FormData) {
   const { supabase, userId } = await currentUserId();
-  const id = String(formData.get("id") || "");
+  const parseResult = schemas.deleteQuoteSchema.safeParse({ id: formData.get("id") });
+
+  if (!parseResult.success) return { error: parseResult.error.issues[0].message };
+  const { id } = parseResult.data;
 
   const { error } = await supabase.from("quotes").delete().eq("id", id).eq("user_id", userId);
 
@@ -212,13 +247,8 @@ export async function deleteQuote(formData: FormData) {
     return { error: error.message };
   }
 
-  await supabase.from("app_events").insert({
-    event_name: "quote_deleted",
-    properties: { quote_id: id },
-    user_id: userId,
-  });
-
   revalidatePath("/");
+  return { success: true };
 }
 
 export async function devBypassLogin() {
@@ -244,13 +274,11 @@ export async function devBypassLogin() {
       email_confirm: true,
     });
     if (createError) {
-      redirect(
-        `/?auth=error&message=${encodeURIComponent(`Admin create failed: ${createError.message}`)}`
-      );
+      throw new Error(`Admin create failed: ${createError.message}`);
     }
   }
 
-  // Now sign in as the dev user using the regular client
+  // Sign in standard user client
   const supabase = await createClient();
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: DEV_EMAIL,
@@ -258,9 +286,7 @@ export async function devBypassLogin() {
   });
 
   if (signInError) {
-    redirect(
-      `/?auth=error&message=${encodeURIComponent(`Sign-in failed: ${signInError.message}`)}`
-    );
+    throw new Error(`Sign-in failed: ${signInError.message}`);
   }
 
   redirect("/");
@@ -269,14 +295,24 @@ export async function devBypassLogin() {
 export async function updateProfile(formData: FormData) {
   const { supabase, userId } = await currentUserId();
   
+  const parseResult = schemas.updateProfileSchema.safeParse({
+    senderName: formData.get("senderName"),
+    businessName: formData.get("businessName"),
+    phone: formData.get("phone"),
+    signature: formData.get("signature"),
+  });
+
+  if (!parseResult.success) return { error: parseResult.error.issues[0].message };
+  const data = parseResult.data;
+  
   const { error } = await supabase
     .from("profiles")
     .upsert({
       id: userId,
-      sender_name: String(formData.get("senderName") || "").trim(),
-      business_name: String(formData.get("businessName") || "").trim(),
-      phone: String(formData.get("phone") || "").trim(),
-      signature: String(formData.get("signature") || "").trim(),
+      sender_name: data.senderName,
+      business_name: data.businessName,
+      phone: data.phone,
+      signature: data.signature,
     });
 
   if (error) {
@@ -289,8 +325,13 @@ export async function updateProfile(formData: FormData) {
 
 export async function updateTemplate(formData: FormData) {
   const { supabase, userId } = await currentUserId();
-  const id = String(formData.get("id") || "");
-  const body = String(formData.get("body") || "").trim();
+  const parseResult = schemas.updateTemplateSchema.safeParse({
+    id: formData.get("id"),
+    body: formData.get("body"),
+  });
+
+  if (!parseResult.success) return { error: parseResult.error.issues[0].message };
+  const { id, body } = parseResult.data;
   
   const { error } = await supabase
     .from("templates")
@@ -302,7 +343,162 @@ export async function updateTemplate(formData: FormData) {
     return { error: error.message };
   }
 
-  revalidatePath("/templates");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function createCheckoutSession(priceId: string) {
+  const { supabase, userId } = await currentUserId();
+  const { data: profile } = await supabase.from("profiles").select("stripe_customer_id").eq("id", userId).single();
+
+  const Stripe = (await import("stripe")).default;
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+  let customerId = profile?.stripe_customer_id;
+
+  if (!customerId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const customer = await stripe.customers.create({
+      email: user?.email,
+      metadata: { userId },
+    });
+    customerId = customer.id;
+
+    await supabase.from("profiles").upsert({ id: userId, stripe_customer_id: customerId });
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    customer: customerId,
+    mode: "subscription",
+    payment_method_types: ["card"],
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${appUrl()}/settings?success=true`,
+    cancel_url: `${appUrl()}/settings?canceled=true`,
+  });
+
+  if (!session.url) {
+    return { error: "Could not create checkout session" };
+  }
+
+  redirect(session.url);
+}
+
+export async function createPortalSession() {
+  const { supabase, userId } = await currentUserId();
+  const { data: profile } = await supabase.from("profiles").select("stripe_customer_id").eq("id", userId).single();
+
+  if (!profile?.stripe_customer_id) {
+    return { error: "No billing profile found" };
+  }
+
+  const Stripe = (await import("stripe")).default;
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: profile.stripe_customer_id,
+    return_url: `${appUrl()}/settings`,
+  });
+
+  if (!session.url) {
+    return { error: "Could not create portal session" };
+  }
+
+  redirect(session.url);
+}
+
+export async function sendQuoteEmail(formData: FormData) {
+  const { supabase, userId } = await currentUserId();
+  
+  const parseResult = schemas.sendQuoteEmailSchema.safeParse({
+    email: formData.get("email"),
+    subject: formData.get("subject"),
+    body: formData.get("body"),
+    quoteId: formData.get("quoteId"),
+  });
+
+  if (!parseResult.success) return { error: parseResult.error.issues[0].message };
+  const { email, subject, body, quoteId } = parseResult.data;
+
+  // Verify subscription status (rudimentary check for MVP)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("stripe_subscription_id")
+    .eq("id", userId)
+    .single();
+    
+  if (!profile?.stripe_subscription_id && process.env.NODE_ENV === "production") {
+    return { error: "You must upgrade to a Pro plan to send emails automatically." };
+  }
+
+  try {
+    const { getResend, getFromEmail } = await import("@/lib/email");
+    const resend = getResend();
+    if (!resend) return { error: "Email provider not configured." };
+
+    const { error: resendError } = await resend.emails.send({
+      from: getFromEmail(),
+      to: [email],
+      subject,
+      text: body,
+      replyTo: "no-reply@quotechaser.com", 
+    });
+
+    if (resendError) return { error: resendError.message };
+
+    // Record that we sent an email
+    await supabase.from("follow_up_history").insert({
+      quote_id: quoteId,
+      user_id: userId,
+      channel: "email",
+      notes: `Sent email with subject: "${subject}"`,
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error("Email send failed:", err);
+    return { error: "Failed to send email. Check server logs." };
+  }
+}
+
+export async function submitFeedback(formData: FormData) {
+  const { supabase, userId } = await currentUserId();
+  const parseResult = schemas.submitFeedbackSchema.safeParse({
+    message: formData.get("message"),
+    sentiment: formData.get("sentiment"),
+  });
+
+  if (!parseResult.success) return { error: parseResult.error.issues[0].message };
+  const { message, sentiment } = parseResult.data;
+
+  try {
+    // 1. Insert into database (fail silently if schema not applied)
+    await supabase.from("feedback").insert({
+      user_id: userId,
+      message,
+      sentiment,
+    });
+  } catch (err) {
+    console.warn("Could not save feedback to DB:", err);
+  }
+
+  // 2. Alert Slack if configured
+  if (process.env.SLACK_WEBHOOK_URL) {
+    const icon = sentiment === "positive" ? "🟢" : sentiment === "negative" ? "🔴" : "⚪";
+    try {
+      await fetch(process.env.SLACK_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: `${icon} *New Feedback*\n> ${message}\n_Sentiment: ${sentiment}, User ID: ${userId}_`,
+        }),
+      });
+    } catch (err) {
+      console.warn("Could not send feedback to Slack:", err);
+    }
+  }
+
   return { success: true };
 }
 
@@ -350,98 +546,6 @@ export async function resetTemplates() {
 
   revalidatePath("/templates");
   return { success: true };
-}
-
-export async function sendQuoteEmail(formData: FormData) {
-  const { supabase, userId } = await currentUserId();
-  
-  // Verify subscription status (rudimentary check for MVP)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("stripe_subscription_id")
-    .eq("id", userId)
-    .single();
-    
-  if (!profile?.stripe_subscription_id && process.env.NODE_ENV === "production") {
-    return { error: "You must upgrade to a Pro plan to send emails automatically." };
-  }
-
-  const email = String(formData.get("email") || "").trim();
-  const subject = String(formData.get("subject") || "").trim();
-  const body = String(formData.get("body") || "").trim();
-  const quoteId = String(formData.get("quoteId") || "").trim();
-
-  if (!email || !subject || !body) {
-    return { error: "Missing email, subject, or body" };
-  }
-
-  try {
-    const { getResend, getFromEmail } = await import("@/lib/email");
-    const resend = getResend();
-    const fromEmail = getFromEmail();
-    
-    await resend.emails.send({
-      from: fromEmail,
-      to: email,
-      subject: subject,
-      text: body,
-    });
-    
-    // Update the last_touch_at on the quote
-    if (quoteId) {
-      await supabase
-        .from("quotes")
-        .update({ last_touch_at: new Date().toISOString() })
-        .eq("id", quoteId)
-        .eq("user_id", userId);
-    }
-    
-    revalidatePath("/");
-    return { success: true };
-  } catch (err) {
-    console.error("Email send error:", err);
-    return { error: err instanceof Error ? err.message : "Failed to send email" };
-  }
-}
-
-export async function submitFeedback(formData: FormData) {
-  const { supabase, userId } = await currentUserId();
-  const message = String(formData.get("message") || "").trim();
-  const sentiment = String(formData.get("sentiment") || "").trim();
-
-  if (!message) {
-    return { error: "Message cannot be empty." };
-  }
-
-  try {
-    // 1. Insert into database (fail silently if schema not applied)
-    const { error: dbError } = await supabase.from("feedbacks").insert({
-      user_id: userId,
-      message,
-      sentiment,
-    });
-    if (dbError) {
-      console.warn("Feedback DB insert failed (schema might not be applied):", dbError.message);
-    }
-
-    // 2. Send email notification
-    const { getResend, getFromEmail } = await import("@/lib/email");
-    const resend = getResend();
-    const fromEmail = getFromEmail();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    await resend.emails.send({
-      from: fromEmail,
-      to: "surjeet@quotechaser.com", // Send to admin
-      subject: `New Feedback from ${user?.email || userId} (${sentiment || "neutral"})`,
-      text: `User ID: ${userId}\nEmail: ${user?.email || "Unknown"}\nSentiment: ${sentiment}\n\nMessage:\n${message}`,
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error submitting feedback:", error);
-    return { error: error instanceof Error ? error.message : "Failed to submit feedback." };
-  }
 }
 
 export async function importQuotes(quotes: Record<string, string | number>[]) {
