@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuoteChaser
 
-## Getting Started
+QuoteChaser is a narrow MVP for solo service businesses that lose revenue by not following up on quotes.
 
-First, run the development server:
+The product intentionally starts empty. There is no seeded customer data in the app. A user must sign in, add a real quote, copy a follow-up message, and mark the outcome.
+
+## Current MVP
+
+- Magic-link auth through Supabase.
+- User-owned quotes stored in Postgres.
+- Row Level Security for quote and event data.
+- Follow-up queue based on quote sent date.
+- Day 2, Day 7, Day 14, and Day 30 stages.
+- Copy email/SMS message actions.
+- Mark quote won, lost, or snoozed.
+- Activation events for quote creation and message copy.
+- Optional Stripe Payment Link via `NEXT_PUBLIC_STRIPE_PAYMENT_LINK`.
+
+## Setup
+
+1. Create a Supabase project.
+2. Run `supabase/schema.sql` in the Supabase SQL editor.
+3. Copy `.env.example` to `.env.local`.
+4. Set:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_STRIPE_PAYMENT_LINK=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Run:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Validation Loop
 
-## Learn More
+The first real success metric is not page views. It is:
 
-To learn more about Next.js, take a look at the following resources:
+1. User signs in.
+2. User adds one real quote.
+3. User copies one follow-up message.
+4. User marks a quote won, lost, or snoozed.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Do not add AI, automated SMS, CRM integrations, dashboards, or team features until at least a few real users complete that loop.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Research Basis
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- YC MVP guidance: launch quickly, get initial customers, talk to users, iterate.
+- Paul Graham, “Do Things That Don’t Scale”: manually recruit early users.
+- Stripe startup/payment guidance: use the simplest payment path first.
+- Supabase guidance: use RLS, indexed ownership columns, and server-side auth helpers.

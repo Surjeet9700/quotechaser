@@ -1,0 +1,22 @@
+ 
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { LandingClient } from "@/components/marketing/landing-client";
+
+export default async function LandingPage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/dashboard");
+  }
+
+  return (
+    <>
+      <LandingClient />
+    </>
+  );
+}

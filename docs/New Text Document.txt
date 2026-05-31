@@ -1,0 +1,105 @@
+prompt 1
+"Listen to me very carefully. You are building a micro-SaaS, which means momentum and revenue are the only two things that matter. You are not building a portfolio project. You are building a machine to convert a freelancer’s anxiety into cash, and taking a cut.
+
+Right now, you are falling into the classic trap: over-engineering features instead of validating the core transaction. Let's rip this apart.
+
+### 1. What is the actual core value proposition?
+**"We turn forgotten quotes into cash."**
+That’s it. You are not a CRM. You are not a quoting tool. You are the safety net that catches the 40% of deals that solo businesses lose because they are too busy doing the work to follow up on the sales. Your tool does one thing: it ensures a follow-up happens.
+
+### 2. What is the one workflow that must work perfectly before launch?
+**Add Quote → Remind → 1-Click Send Follow-Up → Mark as Won.**
+If a user adds a quote, your system *must* relentlessly and reliably prompt them when it’s time to follow up, and the friction to actually send that follow-up (via email or copying a message) must be absolutely zero. If this loop breaks, the product is worthless.
+
+### 3. Which features are distractions before the first 5 paying users?
+- **CSV Imports:** Nobody has a CSV of quotes lying around when they are a solo freelancer. They have an inbox. If someone *really* wants to import 50 quotes, do it manually for them. Concierge onboarding.
+- **The Feedback Widget:** You don't need a widget. Put your personal email or a Calendly link in the dashboard. Talk to them.
+- **Complex Theme Toggles / Dark Mode:** Nobody pays for dark mode. They pay for ROI.
+- **Quote "Proposals" and Payments:** Wait, you are collecting deposits on the quote page? If they already have a quoting tool (like QuickBooks or Harvest), they just want you to do the *follow-up*. Don't try to replace their invoicing software yet. 
+
+### 4. What must be removed, hidden, or simplified?
+- **Hide the CSV import.** It's an edge case that creates technical debt and friction.
+- **Simplify the templates.** Give them exactly *three* battle-tested follow-up templates (e.g., "The Gentle Nudge", "The Value Add", "The Break-up"). Do not force them to write their own or build complex template builders. Give them defaults that convert.
+- **Remove any "dashboard analytics"** beyond simple counts. They don't need a chart. They need to know who to email today.
+
+### 5. What are the activation metrics?
+An activated user is someone who has experienced the core value.
+1. **Time to First Quote:** Did they add a quote within 10 minutes of signing up?
+2. **The "Aha" Moment:** Did they trigger their first follow-up from the platform? 
+If they add 0 quotes, they are dead. If they add a quote but never send a follow-up, they will churn.
+
+### 6. What are the payment validation metrics?
+- **Conversion on Paywall:** Are you charging them? You should be. Put a hard limit: "Track 3 quotes for free. Pay $15/mo for unlimited."
+- If 100 people sign up and 0 hit the paywall, your activation is broken.
+- If 10 people hit the paywall and 0 pay, your pricing or perceived value is broken.
+
+### 7. What would make this fail even if the code works perfectly?
+**Requiring them to log in to know what to do.**
+Solo freelancers do not open new tabs for fun. If your system relies on them proactively logging into `QuoteChaser.com` to check their queue, you will fail. The system *must* push to them. Send them a morning email: *"You have 2 quotes rotting. Click here to send the follow-up."* 
+
+### 8. What should the MVP launch checklist be?
+1. **Landing Page:** Headline, subheadline, 1 image of the queue, Pricing ($15/mo), Stripe Checkout.
+2. **Onboarding:** Create account → Add 1 real quote immediately.
+3. **Core Loop:** Daily email digest of "Who to follow up with today."
+4. **Action:** 1-click copy/send of the follow-up template.
+5. **Analytics:** PostHog or simple DB tracking to see if they actually sent it.
+*Launch it tomorrow.*
+
+### 9. What should I absolutely NOT build yet?
+- **Fully Automated Email Sending:** Start with "Click to send" (mail merge links or copy-paste). If you automate it completely on day one, freelancers will be terrified you're going to spam their clients. Build trust first.
+- **Integrations (Zapier, QuickBooks, Xero):** Do not build API integrations until 10 paying customers literally threaten to churn if you don't.
+- **Mobile App:** A responsive web app is fine. Do not touch React Native or Swift.
+- **Multi-user / Agency features:** You are selling to solo businesses right now.
+
+**Your next move:** Stop coding the CSV importer. Hide the feedback widget. Put a hard limit on free quotes. Launch."
+
+
+prompt 2
+"Here is your YC partner MVP scope. Read this, build exactly this, and then go talk to users. Do not add a single button to this list.
+
+**1. One-sentence product promise**
+We tell you exactly who to follow up with today so you stop losing deals to freelancers who reply faster.
+
+**2. ICP (Ideal Customer Profile) in one sentence**
+Solo service providers (designers, devs, consultants) who send at least 5 custom quotes a month and currently track them in their head or a messy inbox.
+
+**3. MVP workflow**
+- User logs in and manually adds a quote they just sent (Customer Name, Email, Amount, Date Sent).
+- Every morning, the system emails the user a digest: "Follow up with these 3 people today."
+- User clicks a link in the email, lands on the dashboard, and clicks "Copy Follow-Up to Clipboard."
+- User pastes it into their own Gmail, sends it, and clicks "Mark as Followed-Up" or "Won" in QuoteChaser.
+
+**4. Required screens**
+- **Landing Page:** Headline, subhead, "Track your first 3 quotes for free", Auth/Sign-up.
+- **Dashboard / Daily Queue:** A simple list sorted by "Requires Follow-Up Today."
+- **Add Quote Modal:** A stupidly simple form (Name, Email, Amount, Sent Date).
+- **Settings / Paywall:** Stripe checkout link when they hit the limit. 
+
+**5. Required database objects**
+- **User:** ID, Email, Stripe Customer ID, Subscription Status.
+- **Quote:** ID, User ID, Customer Name, Email, Amount, Sent Date, Status (Open, Won, Lost), Last Follow-Up Date, Follow-Up Count.
+
+**6. Required payment path**
+- Hard paywall after 3 active quotes.
+- A static "Upgrade to Unlimited for $15/mo" button that links to a pre-configured Stripe Payment Link.
+- A Stripe webhook that catches `checkout.session.completed` to flip the User's Subscription Status to `active`.
+
+**7. What to fake/manualize**
+- **Onboarding:** When someone signs up, manually email them from your personal Gmail asking, "What quote did you send this week that you forgot to follow up on?"
+- **Automated Sending:** Do not build SMTP integrations or Gmail OAuth. The app just generates the text for them to copy and paste into their own email client.
+- **Dynamic Follow-Up Schedules:** Hardcode it. Follow up 3 days after the quote is sent. Follow up again 7 days after that. Do not let the user customize this yet.
+
+**8. What to postpone**
+- Automated email/SMS sending to clients.
+- Custom template builders (hardcode 2 good templates for them to copy).
+- CRM features, notes, tagging, or proposal generation.
+- CSV imports (do it for them manually if they beg).
+- Any analytics, charts, or graphs.
+
+**9. Definition of “ready to charge”**
+The app successfully sends the user a daily email telling them who to follow up with, and the user can mark it as "Won" or "Lost" without the database crashing. If it does that, it is ready to charge.
+
+**10. Definition of “validated”**
+5 people who are not your friends or family pull out their credit card and pay you $15/month because the tool helped them close a deal they would have otherwise forgotten.
+
+Stop writing code for edge cases. Build this list and launch by Friday."

@@ -1,0 +1,10 @@
+{
+  "disabledMcpjsonServers": [
+    "spawner"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(dir *)"
+    ]
+  }
+}
