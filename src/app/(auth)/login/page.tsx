@@ -7,6 +7,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { SubmitButton } from "./submit-button";
 
 function hasSupabaseConfig() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -115,10 +116,7 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
                     className="h-10 rounded-full border-gray-200 px-4 text-sm focus-visible:ring-[#F26522]/30 focus-visible:border-[#F26522]"
                   />
                 </Field>
-                <Button type="submit" className="w-full bg-[#F26522] hover:bg-[#e05a1a] text-white rounded-full font-semibold h-10 flex items-center justify-center gap-2 border-none shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.02] mt-2">
-                  <Mail className="w-4 h-4" />
-                  <span>Send magic link</span>
-                </Button>
+                <SubmitButton />
                 {process.env.ENABLE_DEV_BYPASS === "true" && (
                   <Button
                     type="submit"
