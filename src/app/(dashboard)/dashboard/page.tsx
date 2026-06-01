@@ -43,7 +43,6 @@ export default async function DashboardPage() {
     <Dashboard
       paymentLink={process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK || ""}
       quotes={(quotes ?? []) as QuoteRow[]}
-      userEmail={user.email ?? ""}
       templates={templates || []}
       profile={profile}
     >

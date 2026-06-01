@@ -144,28 +144,28 @@ export function CsvMapper({
       onOpenChange(val);
     }}>
       <SheetTrigger render={
-        <button className="rounded-full bg-white border border-gray-200 hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] text-gray-700 px-4 h-9 font-bold text-[12px] uppercase tracking-wider transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm">
+        <button className="rounded-md bg-background border border-border hover:bg-muted active:scale-[0.98] text-foreground px-3 h-8 font-medium text-[12px] transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm">
           <Upload className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Import CSV</span>
         </button>
       } />
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl bg-white p-6 rounded-l-3xl border-l border-gray-150">
+      <SheetContent className="w-full overflow-y-auto sm:max-w-xl bg-background p-6 rounded-l-3xl border-l border-border">
         
-        <SheetHeader className="border-b border-gray-100 pb-4 mb-6">
-          <SheetTitle className="text-lg font-bold text-gray-950 tracking-tight">Import CSV</SheetTitle>
-          <SheetDescription className="text-gray-400 text-xs mt-1 leading-relaxed">
+        <SheetHeader className="border-b border-border pb-4 mb-6">
+          <SheetTitle className="text-lg font-semibold text-foreground tracking-tight">Import CSV</SheetTitle>
+          <SheetDescription className="text-muted-foreground text-[13px] mt-1 leading-relaxed">
             Upload your spreadsheet to seamlessly transition your pipeline into QuoteChaser.
           </SheetDescription>
         </SheetHeader>
 
         {!file ? (
-          <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-gray-50 transition-colors">
-            <Upload className="w-8 h-8 text-gray-400 mb-3" />
-            <p className="text-sm font-semibold text-gray-900">Upload your CSV file</p>
-            <p className="text-xs text-gray-400 mt-1 mb-4 text-center">
+          <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+            <Upload className="w-8 h-8 text-muted-foreground mb-3" />
+            <p className="text-sm font-medium text-foreground">Upload your CSV file</p>
+            <p className="text-[13px] text-muted-foreground mt-1 mb-4 text-center">
               We'll extract the column names so you can match them to our fields.
             </p>
-            <label className="rounded-full bg-[#F26522] hover:bg-[#e05a1a] hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-[11px] uppercase tracking-wider px-5 h-9 shadow-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5">
+            <label className="rounded-md bg-foreground hover:bg-foreground/90 active:scale-[0.98] text-background font-medium text-[13px] px-4 h-9 shadow-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5">
               <span>Select File</span>
               <input 
                 type="file" 
@@ -177,29 +177,29 @@ export function CsvMapper({
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 shadow-[inset_0_1px_2px_rgba(0,0,0,0.005)]">
-              <p className="text-xs font-semibold text-gray-900 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+            <div className="bg-muted/30 border border-border rounded-xl p-4">
+              <p className="text-[13px] font-medium text-foreground flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                 {file.name}
               </p>
-              <p className="text-[11px] text-gray-500 mt-0.5">{data.length} rows detected.</p>
+              <p className="text-[12px] text-muted-foreground mt-1">{data.length} rows detected.</p>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-[13px] font-bold text-gray-950 uppercase tracking-wider">Map Columns</h3>
-              <div className="grid gap-4">
+              <h3 className="text-[13px] font-semibold text-foreground tracking-tight">Map Columns</h3>
+              <div className="grid gap-3">
                 {Object.entries(FIELD_LABELS).map(([key, label]) => {
                   const fieldKey = key as keyof FieldMapping;
                   const isRequired = REQUIRED_FIELDS.includes(fieldKey);
                   return (
-                    <div key={fieldKey} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 border border-gray-100 rounded-xl">
-                      <label className="text-[12px] font-semibold text-gray-700">
-                        {label} {isRequired && <span className="text-[#F26522]">*</span>}
+                     <div key={fieldKey} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 border border-border rounded-md bg-background">
+                      <label className="text-[13px] font-medium text-foreground">
+                        {label} {isRequired && <span className="text-destructive">*</span>}
                       </label>
                       <select
                         value={mapping[fieldKey] || ""}
                         onChange={(e) => setMapping({ ...mapping, [fieldKey]: e.target.value })}
-                        className="w-full sm:w-48 h-9 px-3 bg-gray-50 border border-gray-200 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg outline-none transition-all duration-200 text-[12px] text-gray-900 font-medium cursor-pointer"
+                        className="w-full sm:w-48 h-9 px-3 bg-background border border-border focus:border-ring focus:ring-1 focus:ring-ring rounded-md outline-none transition-all duration-200 text-[13px] text-foreground font-medium cursor-pointer"
                       >
                         <option value="">-- Ignore this field --</option>
                         {headers.map((h) => (
@@ -212,23 +212,23 @@ export function CsvMapper({
               </div>
             </div>
 
-            <SheetFooter className="border-t border-gray-100 pt-4 flex items-center justify-end gap-2">
+            <SheetFooter className="border-t border-border pt-4 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={reset}
-                className="rounded-full bg-white hover:bg-gray-50 text-gray-500 font-bold text-[11px] uppercase tracking-wider px-4 h-9 border border-gray-200 shadow-sm transition-all duration-200 cursor-pointer"
+                className="rounded-md bg-background hover:bg-muted text-foreground font-medium text-[13px] px-4 h-9 border border-border shadow-sm transition-all duration-200 cursor-pointer"
               >
                 Start Over
               </button>
               <button
                 disabled={isPending}
                 onClick={handleImport}
-                className="rounded-full bg-[#F26522] hover:bg-[#e05a1a] hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-[11px] uppercase tracking-wider px-5 h-9 border-none shadow-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                className="rounded-md bg-foreground hover:bg-foreground/90 active:scale-[0.98] text-background font-medium text-[13px] px-4 h-9 border-none shadow-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isPending ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                  <Loader2 className="w-4 h-4 animate-spin text-background" />
                 ) : (
-                  <ArrowRight className="w-3.5 h-3.5 text-white" />
+                  <ArrowRight className="w-4 h-4 text-background" />
                 )}
                 <span>{isPending ? "Importing..." : "Confirm Import"}</span>
               </button>

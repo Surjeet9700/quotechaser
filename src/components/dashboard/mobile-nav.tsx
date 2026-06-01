@@ -5,15 +5,12 @@ import { Menu, Clipboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SidebarNav } from "./sidebar-nav";
-import { currency } from "./utils";
 import { useState } from "react";
 
 export function MobileNav({
   userEmail,
-  openValue,
 }: {
   userEmail: string;
-  openValue: number;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -28,7 +25,7 @@ export function MobileNav({
       <SheetContent side="left" className="w-[280px] p-0 flex flex-col bg-sidebar text-sidebar-foreground border-r-0">
         <div className="flex flex-col h-full px-3 py-4">
           <div className="flex items-center gap-2 px-2 py-1.5">
-            <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg">
+            <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
               <Clipboard />
             </div>
             <div className="flex min-w-0 flex-col">
@@ -39,12 +36,6 @@ export function MobileNav({
           
           <div onClick={() => setOpen(false)}>
             <SidebarNav />
-          </div>
-
-          <div className="bg-background mt-auto rounded-lg border p-3">
-            <p className="text-xs font-medium">Revenue at risk</p>
-            <p className="mt-2 text-2xl font-semibold">{currency.format(openValue / 100)}</p>
-            <p className="text-muted-foreground mt-1 text-xs">Open quotes that need a follow-up.</p>
           </div>
         </div>
       </SheetContent>

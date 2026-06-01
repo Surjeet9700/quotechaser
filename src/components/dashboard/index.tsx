@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react/no-unescaped-entities, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { ReactNode, useMemo, useState, useTransition } from "react";
@@ -15,7 +15,7 @@ import { QuoteDetail } from "./quote-detail";
 import { QuoteList, QuoteListEmpty } from "./quote-list";
 import { type QuoteRow } from "./types";
 import { dueDate, isDue, todayDate } from "./utils";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export type { QuoteRow };
 
@@ -23,26 +23,22 @@ export function Dashboard({
   children,
   paymentLink,
   quotes,
-  userEmail,
   templates,
   profile,
 }: {
   children: ReactNode;
   paymentLink: string;
   quotes: QuoteRow[];
-  userEmail: string;
   templates: any[];
   profile: any;
 }) {
-  const [selectedId, setSelectedId] = useState(quotes[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState("");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"due" | "open" | "won">("due");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
   const [copied, setCopied] = useState<"email" | "sms" | "link" | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  const selectedQuote = quotes.find((quote) => quote.id === selectedId) ?? quotes[0] ?? null;
 
   const visibleQuotes = useMemo(() => {
     return quotes.filter((quote) => {
@@ -57,6 +53,8 @@ export function Dashboard({
       return matchesFilter && searchText.includes(query.toLowerCase());
     });
   }, [filter, query, quotes]);
+
+  const selectedQuote = visibleQuotes.find((quote) => quote.id === selectedId) ?? null;
 
   const stats = useMemo(() => {
     const active = quotes.filter((quote) => quote.status === "open" || quote.status === "snoozed");
@@ -123,7 +121,7 @@ export function Dashboard({
           method: "POST",
         });
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to copy to clipboard.");
     }
   }
@@ -169,40 +167,40 @@ export function Dashboard({
 
   return (
     <div className="flex min-w-0 flex-col">
-      <header className="flex flex-col gap-3 border-b border-border px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6 bg-background">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Today&apos;s follow-ups</h1>
-          <p className="text-muted-foreground text-sm font-medium mt-1">
-            {new Date().toLocaleDateString("en-US", { dateStyle: "full" })} · Manage active quotes and follow-ups.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {paymentLink ? (
-            <Button
-              className="bg-[#F26522] hover:bg-[#e05a1a] text-white rounded-full font-bold text-[11px] uppercase tracking-wider px-5 h-9 border-none shadow-sm transition-all duration-200 cursor-pointer shrink-0 flex items-center justify-center hover:scale-[1.02]"
-              render={<a href={paymentLink} target="_blank" rel="noreferrer" />}
-            >
-              Upgrade
-            </Button>
-          ) : null}
-          <CsvMapper open={csvOpen} onOpenChange={setCsvOpen} />
-          <AddQuoteSheet open={sheetOpen} onOpenChange={setSheetOpen} />
-          {children}
-        </div>
-      </header>
-
-      <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
+      <div className="flex flex-col gap-4 p-4 sm:p-8 pb-24 max-w-[1400px] mx-auto w-full">
         {!profile?.sender_name || !profile?.business_name ? (
-          <div className="bg-[#F26522]/5 border border-[#F26522]/15 text-[#F26522] px-4 py-3 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-semibold tracking-tight shadow-[0_1px_2px_rgba(242,99,34,0.02)] gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="bg-muted border border-border text-foreground px-4 py-3 rounded-md flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-medium tracking-tight gap-3 mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#F26522] animate-pulse shrink-0" />
-              <span>✨ Complete your profile in <Link href="/settings" className="underline font-bold hover:text-[#e05a1a] transition-colors">Settings</Link> to ensure your follow-up emails don't use default placeholders!</span>
+              <span>Complete your profile in <Link href="/settings" className="underline font-semibold hover:text-foreground/80 transition-colors">Settings</Link> to enable email placeholders.</span>
             </div>
-            <Link href="/settings" className="bg-[#F26522] hover:bg-[#e05a1a] text-white rounded-full px-3.5 py-1.5 font-bold transition-all duration-200 hover:scale-[1.02] shrink-0 text-center text-[11px] uppercase tracking-wider">
+            <Link href="/settings" className="bg-foreground text-background rounded-md px-3 py-1.5 font-medium transition-all text-[11px]">
               Set Up Now
             </Link>
           </div>
         ) : null}
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+              Today
+              <span className="text-sm font-medium text-muted-foreground">{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {paymentLink ? (
+              <Button
+                className="bg-brand hover:bg-brand/90 text-primary-foreground rounded-md font-medium text-[12px] px-3 h-8 border-none shadow-sm transition-all duration-200 cursor-pointer shrink-0 flex items-center justify-center"
+                render={<a href={paymentLink} target="_blank" rel="noreferrer" />}
+              >
+                Upgrade
+              </Button>
+            ) : null}
+            <CsvMapper open={csvOpen} onOpenChange={setCsvOpen} />
+            <AddQuoteSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+            {children}
+          </div>
+        </div>
 
         <MetricCards
           due={stats.due}
@@ -212,41 +210,38 @@ export function Dashboard({
         />
 
         {quotes.length === 0 ? (
-          <QuoteListEmpty onAddFirst={() => setSheetOpen(true)} />
+          <QuoteListEmpty onAddFirst={() => setSheetOpen(true)} onImport={() => setCsvOpen(true)} />
         ) : (
-          <div className="grid flex-1 gap-6 xl:grid-cols-[minmax(0,1fr)_420px] items-start">
+          <div className="grid flex-1 gap-6 items-start grid-cols-1">
             
-            {/* The Follow-up queue Card Container */}
             <div className="bg-card rounded-2xl border border-border inset-shadow-sm p-6 sm:p-8 min-w-0 flex flex-col gap-6">
               
-              {/* Header and Controls block */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
                 <div>
                   <h2 className="text-base font-bold text-foreground tracking-tight">Active Pipeline</h2>
                   <p className="text-muted-foreground text-xs mt-1 leading-relaxed">Based on quote sent date and open status.</p>
                 </div>
                 
-                {/* Search & Tabs filters */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                   <div className="relative">
-                    <Search className="text-gray-400 pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4" />
+                    <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4" />
                     <input
                       type="text"
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="Search quotes"
                       value={query}
-                      className="w-full sm:w-48 h-9 pl-9 pr-3 text-[13px] bg-background hover:bg-muted border border-border focus:border-ring rounded-xl outline-none transition-all duration-200 text-foreground placeholder:text-muted-foreground font-semibold"
+                      className="w-full sm:w-48 h-9 pl-9 pr-3 text-[13px] bg-background hover:bg-muted border border-border focus:border-ring rounded-md outline-none transition-all duration-200 text-foreground placeholder:text-muted-foreground font-semibold"
                     />
                   </div>
                   
                   {/* Clean sober control tabs */}
-                  <div className="flex bg-muted border border-border p-0.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  <div className="flex bg-muted border border-border p-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
                     {["due", "open", "won"].map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setFilter(tab as "due" | "open" | "won")}
                         className={cn(
-                          "px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer",
+                          "px-3 py-1.5 rounded-md transition-all duration-200 cursor-pointer",
                           filter === tab 
                             ? "bg-background text-foreground shadow-sm border border-border"
                             : "hover:text-foreground"
@@ -265,13 +260,18 @@ export function Dashboard({
                   quotes={visibleQuotes}
                   selectedId={selectedQuote?.id ?? ""}
                   setSelectedId={setSelectedId}
+                  updateStatus={changeStatus}
                 />
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Quote details block */}
-            <div className="xl:sticky xl:top-6">
-              {selectedQuote ? (
+        <Dialog open={!!selectedQuote} onOpenChange={(open) => !open && setSelectedId("")}>
+          <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-border bg-background rounded-2xl shadow-xl">
+            <DialogTitle className="sr-only">Quote Details</DialogTitle>
+            {selectedQuote && (
+              <div className="p-6 sm:p-8 max-h-[85vh] overflow-y-auto">
                 <QuoteDetail
                   copied={copied}
                   copyMessage={copyMessage}
@@ -279,16 +279,14 @@ export function Dashboard({
                   isPending={isPending}
                   quote={selectedQuote}
                   removeQuote={removeQuote}
-                  updateStatus={changeStatus}
                   templates={templates}
                   profile={profile}
-                  userEmail={userEmail}
                   logFollowUp={handleLogFollowUp}
                 />
-              ) : null}
-            </div>
-          </div>
-        )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
