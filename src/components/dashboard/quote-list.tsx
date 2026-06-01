@@ -5,30 +5,6 @@ import { cn } from "@/lib/utils";
 import { type QuoteRow } from "./types";
 import { currency, dateLabel, dueDate, nextStage, statusTone } from "./utils";
 
-export function QuoteListEmpty({ onAddFirst, onImport }: { onAddFirst: () => void, onImport?: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center p-12 text-center bg-background rounded-md border border-border min-h-[420px]">
-      <p className="text-foreground text-sm font-medium mb-6">Add your first quote to create your follow-up queue.</p>
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onAddFirst}
-          className="rounded-md bg-foreground hover:bg-foreground/90 active:scale-[0.98] text-background px-4 h-9 font-medium text-[13px] transition-all duration-200 cursor-pointer flex items-center justify-center shadow-sm"
-        >
-          Add Quote
-        </button>
-        {onImport && (
-          <button
-            onClick={onImport}
-            className="rounded-md bg-background border border-border hover:bg-muted active:scale-[0.98] text-foreground px-4 h-9 font-medium text-[13px] transition-all duration-200 cursor-pointer flex items-center justify-center shadow-sm"
-          >
-            Import CSV
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function QuoteList({
   quotes,
   selectedId,

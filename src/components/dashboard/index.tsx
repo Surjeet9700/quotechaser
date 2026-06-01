@@ -12,7 +12,8 @@ import { AddQuoteSheet } from "./add-quote-sheet";
 import { CsvMapper } from "./csv-mapper";
 import { MetricCards } from "./metric-cards";
 import { QuoteDetail } from "./quote-detail";
-import { QuoteList, QuoteListEmpty } from "./quote-list";
+import { QuoteList } from "./quote-list";
+import { WelcomeCard } from "./welcome-card";
 import { type QuoteRow } from "./types";
 import { dueDate, isDue, todayDate } from "./utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -165,106 +166,130 @@ export function Dashboard({
     });
   }
 
+  const profileComplete = Boolean(profile?.sender_name && profile?.business_name);
+
   return (
     <div className="flex min-w-0 flex-col">
       <div className="flex flex-col gap-4 p-4 sm:p-8 pb-24 max-w-[1400px] mx-auto w-full">
-        {!profile?.sender_name || !profile?.business_name ? (
-          <div className="bg-muted border border-border text-foreground px-4 py-3 rounded-md flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-medium tracking-tight gap-3 mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center gap-2">
-              <span>Complete your profile in <Link href="/settings" className="underline font-semibold hover:text-foreground/80 transition-colors">Settings</Link> to enable email placeholders.</span>
-            </div>
-            <Link href="/settings" className="bg-foreground text-background rounded-md px-3 py-1.5 font-medium transition-all text-[11px]">
-              Set Up Now
-            </Link>
-          </div>
-        ) : null}
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-              Today
-              <span className="text-sm font-medium text-muted-foreground">{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-            </h1>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {paymentLink ? (
-              <Button
-                className="bg-brand hover:bg-brand/90 text-primary-foreground rounded-md font-medium text-[12px] px-3 h-8 border-none shadow-sm transition-all duration-200 cursor-pointer shrink-0 flex items-center justify-center"
-                render={<a href={paymentLink} target="_blank" rel="noreferrer" />}
-              >
-                Upgrade
-              </Button>
-            ) : null}
-            <CsvMapper open={csvOpen} onOpenChange={setCsvOpen} />
-            <AddQuoteSheet open={sheetOpen} onOpenChange={setSheetOpen} />
-            {children}
-          </div>
-        </div>
-
-        <MetricCards
-          due={stats.due}
-          openValue={stats.openValue}
-          overdue={stats.overdue}
-          wonValue={stats.wonValue}
-        />
-
         {quotes.length === 0 ? (
-          <QuoteListEmpty onAddFirst={() => setSheetOpen(true)} onImport={() => setCsvOpen(true)} />
+          <WelcomeCard
+            onAddQuote={() => setSheetOpen(true)}
+            onImport={() => setCsvOpen(true)}
+            profileComplete={profileComplete}
+          />
         ) : (
-          <div className="grid flex-1 gap-6 items-start grid-cols-1">
-            
-            <div className="bg-card rounded-2xl border border-border inset-shadow-sm p-6 sm:p-8 min-w-0 flex flex-col gap-6">
-              
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
-                <div>
-                  <h2 className="text-base font-bold text-foreground tracking-tight">Active Pipeline</h2>
-                  <p className="text-muted-foreground text-xs mt-1 leading-relaxed">Based on quote sent date and open status.</p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                  <div className="relative">
-                    <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4" />
-                    <input
-                      type="text"
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Search quotes"
-                      value={query}
-                      className="w-full sm:w-48 h-9 pl-9 pr-3 text-[13px] bg-background hover:bg-muted border border-border focus:border-ring rounded-md outline-none transition-all duration-200 text-foreground placeholder:text-muted-foreground font-semibold"
-                    />
-                  </div>
-                  
-                  {/* Clean sober control tabs */}
-                  <div className="flex bg-muted border border-border p-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
-                    {["due", "open", "won"].map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setFilter(tab as "due" | "open" | "won")}
-                        className={cn(
-                          "px-3 py-1.5 rounded-md transition-all duration-200 cursor-pointer",
-                          filter === tab 
-                            ? "bg-background text-foreground shadow-sm border border-border"
-                            : "hover:text-foreground"
-                        )}
-                      >
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+          <>
+            {!profileComplete ? (
+              <div className="bg-muted border border-border text-foreground px-4 py-3 rounded-md flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-medium tracking-tight gap-3">
+                <span>
+                  Complete your profile in{" "}
+                  <Link
+                    href="/settings"
+                    className="underline font-semibold hover:text-foreground/80 transition-colors"
+                  >
+                    Settings
+                  </Link>{" "}
+                  to enable email placeholders.
+                </span>
+                <Link
+                  href="/settings"
+                  className="bg-foreground text-background rounded-md px-3 py-1.5 font-medium transition-all text-[11px] shrink-0"
+                >
+                  Set Up Now
+                </Link>
+              </div>
+            ) : null}
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+                  Today
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {new Date().toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </h1>
               </div>
 
-              {/* Table List content */}
-              <div className="min-w-0">
-                <QuoteList
-                  quotes={visibleQuotes}
-                  selectedId={selectedQuote?.id ?? ""}
-                  setSelectedId={setSelectedId}
-                  updateStatus={changeStatus}
-                />
+              <div className="flex items-center gap-2">
+                {paymentLink ? (
+                  <Button
+                    className="bg-brand hover:bg-brand/90 text-primary-foreground rounded-md font-medium text-[12px] px-3 h-8 border-none shadow-sm transition-all duration-200 cursor-pointer shrink-0 flex items-center justify-center"
+                    render={<a href={paymentLink} target="_blank" rel="noreferrer" />}
+                  >
+                    Upgrade
+                  </Button>
+                ) : null}
+                <CsvMapper open={csvOpen} onOpenChange={setCsvOpen} />
+                <AddQuoteSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+                {children}
               </div>
             </div>
-          </div>
+
+            <MetricCards
+              due={stats.due}
+              openValue={stats.openValue}
+              overdue={stats.overdue}
+              wonValue={stats.wonValue}
+            />
+
+            <div className="grid flex-1 gap-6 items-start grid-cols-1">
+              <div className="bg-card rounded-md border border-border p-6 sm:p-8 min-w-0 flex flex-col gap-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
+                  <div>
+                    <h2 className="text-base font-bold text-foreground tracking-tight">
+                      Active Pipeline
+                    </h2>
+                    <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
+                      Based on quote sent date and open status.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                    <div className="relative">
+                      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4" />
+                      <input
+                        type="text"
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Search quotes"
+                        value={query}
+                        className="w-full sm:w-48 h-9 pl-9 pr-3 text-[13px] bg-background hover:bg-muted border border-border focus:border-ring rounded-md outline-none transition-all duration-200 text-foreground placeholder:text-muted-foreground font-semibold"
+                      />
+                    </div>
+
+                    <div className="flex bg-muted border border-border p-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                      {["due", "open", "won"].map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => setFilter(tab as "due" | "open" | "won")}
+                          className={cn(
+                            "px-3 py-1.5 rounded-md transition-all duration-200 cursor-pointer",
+                            filter === tab
+                              ? "bg-background text-foreground shadow-sm border border-border"
+                              : "hover:text-foreground"
+                          )}
+                        >
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="min-w-0">
+                  <QuoteList
+                    quotes={visibleQuotes}
+                    selectedId={selectedQuote?.id ?? ""}
+                    setSelectedId={setSelectedId}
+                    updateStatus={changeStatus}
+                  />
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         <Dialog open={!!selectedQuote} onOpenChange={(open) => !open && setSelectedId("")}>
