@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { ReactNode, useMemo, useState, useTransition } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
@@ -40,6 +40,23 @@ export function Dashboard({
   const [csvOpen, setCsvOpen] = useState(false);
   const [copied, setCopied] = useState<"email" | "sms" | "link" | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const profileComplete = Boolean(profile?.sender_name && profile?.business_name);
+
+  const welcomedRef = useRef(false);
+  useEffect(() => {
+    if (welcomedRef.current) return;
+    if (quotes.length !== 0) return;
+    welcomedRef.current = true;
+    void fetch("/api/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        eventName: "welcome_card_viewed",
+        properties: { profile_complete: profileComplete },
+      }),
+    });
+  }, [quotes.length, profileComplete]);
 
   const visibleQuotes = useMemo(() => {
     return quotes.filter((quote) => {
@@ -165,8 +182,6 @@ export function Dashboard({
       toast.success("Follow-up logged and next date scheduled!");
     });
   }
-
-  const profileComplete = Boolean(profile?.sender_name && profile?.business_name);
 
   return (
     <div className="flex min-w-0 flex-col">

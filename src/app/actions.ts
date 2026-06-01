@@ -78,6 +78,12 @@ export async function createQuote(formData: FormData) {
 
   const data = parseResult.data;
 
+  // Activation: check if this is the user's first quote before inserting
+  const { count: existingCount } = await supabase
+    .from("quotes")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+
   // Default next follow up is +2 days
   const nextFollowUpAt = new Date(`${data.quoteSentOn}T00:00:00`);
   nextFollowUpAt.setDate(nextFollowUpAt.getDate() + 2);
@@ -100,6 +106,14 @@ export async function createQuote(formData: FormData) {
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (existingCount === 0) {
+    await supabase.from("app_events").insert({
+      event_name: "first_quote_added",
+      properties: { source: "manual" },
+      user_id: userId,
+    });
   }
 
   revalidatePath("/");
