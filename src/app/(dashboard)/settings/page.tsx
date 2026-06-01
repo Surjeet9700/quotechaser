@@ -31,16 +31,16 @@ export default async function SettingsPage() {
   const isSubscribed = !!profile?.stripe_subscription_id;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 bg-[#F9F9F9]">
+    <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 bg-background">
       <header className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Settings</h1>
-          <p className="text-gray-400 text-sm font-medium mt-1">Manage your business profile and subscription.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Settings</h1>
+          <p className="text-muted-foreground text-sm font-medium mt-1">Manage your business profile and subscription.</p>
         </div>
         <form action={signOut}>
           <button 
             type="submit" 
-            className="rounded-full bg-white hover:bg-gray-50 text-gray-700 px-4 h-9 border border-gray-200 font-bold text-[11px] uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+            className="rounded-full bg-card hover:bg-muted text-foreground px-4 h-9 border border-border font-bold text-[11px] uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
           >
             Sign Out
           </button>

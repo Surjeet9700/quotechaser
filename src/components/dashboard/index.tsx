@@ -185,7 +185,6 @@ export function Dashboard({
               Upgrade
             </Button>
           ) : null}
-          <ThemeToggle />
           <CsvMapper open={csvOpen} onOpenChange={setCsvOpen} />
           <AddQuoteSheet open={sheetOpen} onOpenChange={setSheetOpen} />
           {children}
