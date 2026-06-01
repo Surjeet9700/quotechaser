@@ -169,12 +169,11 @@ export function Dashboard({
 
   return (
     <div className="flex min-w-0 flex-col">
-      <header className="flex flex-col gap-3 border-b border-gray-200/50 dark:border-gray-800/50 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6 bg-white dark:bg-gray-950">
+      <header className="flex flex-col gap-3 border-b border-border px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6 bg-background">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Today&apos;s follow-ups</h1>
-          <p className="text-gray-400 dark:text-gray-500 text-sm font-medium mt-1">
-            {new Date().toLocaleDateString("en-US", { dateStyle: "full" })} · turn open quotes
-            into decisions.
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Today&apos;s follow-ups</h1>
+          <p className="text-muted-foreground text-sm font-medium mt-1">
+            {new Date().toLocaleDateString("en-US", { dateStyle: "full" })} · Manage active quotes and follow-ups.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -193,7 +192,7 @@ export function Dashboard({
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 bg-[#F9F9F9] dark:bg-gray-900">
+      <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
         {!profile?.sender_name || !profile?.business_name ? (
           <div className="bg-[#F26522]/5 border border-[#F26522]/15 text-[#F26522] px-4 py-3 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-semibold tracking-tight shadow-[0_1px_2px_rgba(242,99,34,0.02)] gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2">
@@ -219,13 +218,13 @@ export function Dashboard({
           <div className="grid flex-1 gap-6 xl:grid-cols-[minmax(0,1fr)_420px] items-start">
             
             {/* The Follow-up queue Card Container */}
-            <div className="bg-white dark:bg-gray-950 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-[0_1px_2px_rgba(0,0,0,0.01)] dark:shadow-none p-6 sm:p-8 min-w-0 flex flex-col gap-6">
+            <div className="bg-card rounded-2xl border border-border inset-shadow-sm p-6 sm:p-8 min-w-0 flex flex-col gap-6">
               
               {/* Header and Controls block */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
                 <div>
-                  <h2 className="text-base font-bold text-gray-950 dark:text-gray-100 tracking-tight">Follow-up queue</h2>
-                  <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 leading-relaxed">Based on quote sent date and open status.</p>
+                  <h2 className="text-base font-bold text-foreground tracking-tight">Active Pipeline</h2>
+                  <p className="text-muted-foreground text-xs mt-1 leading-relaxed">Based on quote sent date and open status.</p>
                 </div>
                 
                 {/* Search & Tabs filters */}
@@ -237,12 +236,12 @@ export function Dashboard({
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="Search quotes"
                       value={query}
-                      className="w-full sm:w-48 h-9 pl-9 pr-3 text-[13px] bg-gray-50/50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 border border-gray-200 dark:border-gray-800 focus:border-gray-900 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-gray-950 rounded-xl outline-none transition-all duration-200 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 font-semibold"
+                      className="w-full sm:w-48 h-9 pl-9 pr-3 text-[13px] bg-background hover:bg-muted border border-border focus:border-ring rounded-xl outline-none transition-all duration-200 text-foreground placeholder:text-muted-foreground font-semibold"
                     />
                   </div>
                   
                   {/* Clean sober control tabs */}
-                  <div className="flex bg-gray-50 dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 p-0.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 shrink-0">
+                  <div className="flex bg-muted border border-border p-0.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
                     {["due", "open", "won"].map((tab) => (
                       <button
                         key={tab}
@@ -250,8 +249,8 @@ export function Dashboard({
                         className={cn(
                           "px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer",
                           filter === tab 
-                            ? "bg-white dark:bg-gray-800 text-gray-950 dark:text-gray-100 shadow-sm border border-gray-100 dark:border-gray-700"
-                            : "hover:text-gray-600 dark:hover:text-gray-300"
+                            ? "bg-background text-foreground shadow-sm border border-border"
+                            : "hover:text-foreground"
                         )}
                       >
                         {tab}

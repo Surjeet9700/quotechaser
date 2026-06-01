@@ -36,7 +36,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
+      <body className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col bg-background text-foreground transition-colors`}>
+        <div className="noise-overlay"></div>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -26,7 +26,7 @@ export function LoginForm({ devBypassEnabled }: { devBypassEnabled: boolean }) {
       )}
       {state?.success && (
         <div className="border-[#F26522]/20 bg-[#F26522]/5 text-[#F26522] rounded-2xl border p-4 text-[13px] font-medium leading-relaxed text-center">
-          ✨ We sent you a magic link. Check your inbox to sign in!
+          Check your email. We&apos;ve sent you a secure link to sign in.
         </div>
       )}
 
@@ -42,8 +42,8 @@ export function LoginForm({ devBypassEnabled }: { devBypassEnabled: boolean }) {
                 name="email"
                 required
                 type="email"
-                placeholder="you@company.com"
-                className="h-11 rounded-full border-gray-200/60 px-5 text-[14px] bg-white/60 focus-visible:bg-white focus-visible:ring-[#F26522]/30 focus-visible:border-[#F26522] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] placeholder:text-gray-300"
+                placeholder="name@example.com"
+                className="h-11 rounded-full border-gray-200/60 px-5 text-[14px] bg-white/60 focus-visible:bg-white focus-visible:ring-[#F26522]/30 focus-visible:border-[#F26522] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] placeholder:text-gray-500"
               />
             </Field>
             
@@ -52,7 +52,7 @@ export function LoginForm({ devBypassEnabled }: { devBypassEnabled: boolean }) {
               className="w-full rounded-full font-bold h-11 mt-2 shadow-md shadow-[#F26522]/20 hover:shadow-lg hover:shadow-[#F26522]/30 transition-all hover:scale-[1.02]"
               icon={<Mail className="w-4 h-4" />}
             >
-              Send magic link
+              Send secure link
             </SubmitButton>
 
             {devBypassEnabled && (

@@ -38,7 +38,7 @@ export default async function LoginPage() {
               <img src="/logo.png" alt="QuoteChaser Logo" className="w-full h-full object-contain mix-blend-multiply" />
             </Link>
             <h1 className="text-[24px] font-bold tracking-tight text-gray-900 text-center">Welcome back</h1>
-            <p className="text-gray-500 text-[13px] font-medium mt-1.5 leading-relaxed text-center">Sign in to your Next-Action Queue</p>
+            <p className="text-gray-500 text-[13px] font-medium mt-1.5 leading-relaxed text-center">Sign in to manage your pipeline.</p>
           </div>
           
           <LoginForm devBypassEnabled={devBypassEnabled} />
