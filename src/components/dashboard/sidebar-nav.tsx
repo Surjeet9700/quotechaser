@@ -29,11 +29,11 @@ export function SidebarNav() {
             className={cn(
               "flex h-10 items-center gap-3 rounded-xl px-3.5 text-left text-[13px] transition-all duration-200 group",
               isActive
-                ? "bg-[#F26522]/10 text-[#F26522] font-semibold"
-                : "text-gray-500 hover:bg-gray-50 hover:text-gray-950 font-medium"
+                ? "bg-brand/10 text-brand font-semibold"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground font-medium"
             )}
           >
-            <Icon className={cn("size-4 shrink-0 transition-colors", isActive ? "text-[#F26522]" : "text-gray-400 group-hover:text-gray-950")} />
+            <Icon className={cn("size-4 shrink-0 transition-colors", isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground")} />
             {link.name}
           </Link>
         );
