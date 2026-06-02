@@ -42,9 +42,11 @@ const FIELD_LABELS: Record<keyof FieldMapping, string> = {
 export function CsvMapper({
   open,
   onOpenChange,
+  showTrigger = true,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  showTrigger?: boolean;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -143,13 +145,15 @@ export function CsvMapper({
       if (!val) reset();
       onOpenChange(val);
     }}>
-      <SheetTrigger render={
-        <button className="rounded-md bg-background border border-border hover:bg-muted active:scale-[0.98] text-foreground px-3 h-8 font-medium text-[12px] transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm">
-          <Upload className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Import CSV</span>
-        </button>
-      } />
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl bg-background p-6 rounded-l-3xl border-l border-border">
+      {showTrigger ? (
+        <SheetTrigger render={
+          <button className="rounded-md bg-background border border-border hover:bg-muted active:scale-[0.98] text-foreground px-3 h-8 font-medium text-[12px] transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm">
+            <Upload className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Import CSV</span>
+          </button>
+        } />
+      ) : null}
+      <SheetContent className="w-full overflow-y-auto sm:max-w-xl bg-background p-4 sm:p-6 sm:rounded-l-3xl border-l border-border">
         
         <SheetHeader className="border-b border-border pb-4 mb-6">
           <SheetTitle className="text-lg font-semibold text-foreground tracking-tight">Import CSV</SheetTitle>

@@ -19,9 +19,11 @@ import { stages } from "./types";
 export function AddQuoteSheet({
   open,
   onOpenChange,
+  showTrigger = true,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  showTrigger?: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
@@ -41,13 +43,15 @@ export function AddQuoteSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetTrigger render={
-        <button className="rounded-md bg-foreground hover:bg-foreground/90 active:scale-[0.98] text-background px-3 h-8 font-medium text-[12px] transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm">
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add quote</span>
-        </button>
-      } />
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl bg-background p-6 rounded-l-3xl border-l border-border">
+      {showTrigger ? (
+        <SheetTrigger render={
+          <button className="rounded-md bg-foreground hover:bg-foreground/90 active:scale-[0.98] text-background px-3 h-8 font-medium text-[12px] transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm">
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add quote</span>
+          </button>
+        } />
+      ) : null}
+      <SheetContent className="w-full overflow-y-auto sm:max-w-xl bg-background p-4 sm:p-6 sm:rounded-l-3xl border-l border-border">
         <form action={handleCreateQuote} ref={formRef} className="space-y-6">
           
           <SheetHeader className="border-b border-border pb-4">
